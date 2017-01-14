@@ -12,6 +12,7 @@ using System.IO;
 using System.Net;
 using System.Collections;
 using System.Threading;
+using ColossalFramework.Plugins;
 
 namespace TreeMapper
 {
@@ -113,7 +114,7 @@ namespace TreeMapper
 			x = 15;
 			y += vertPadding;
 			
-			SetLabel(randomnessLabel, "Randomness Factor", x, y);
+			SetLabel(randomnessLabel, "Randomness", x, y);
 			SetTextBox(randomnessTextBox, "40", x + 120, y);
 			y += vertPadding;
 
@@ -152,7 +153,8 @@ namespace TreeMapper
 
 		private void importButton_eventClick(UIComponent component, UIMouseEventParameter eventParam)
 		{
-			try
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "Button clicked");
+            try
 			{
 				int density = int.Parse(densityTextBox.text);
 
@@ -173,12 +175,15 @@ namespace TreeMapper
 
 				treeMapper.ClearTrees();
 				treeMapper.TreeMapperEvent += TreeMapperEvent;
-				Thread thread = new Thread(()=>	treeMapper.ImportTrees(boundingBox));
-				thread.Start();
-			}
+
+                treeMapper.ImportTrees(boundingBox);
+                //Thread thread = new Thread(() => treeMapper.ImportTrees(boundingBox));
+                //thread.Start();
+            }
 			catch (Exception ex)
 			{
-				errorLabel.text = ex.ToString();
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, $"Exception encountered: {ex.ToString()}");
+                errorLabel.text = ex.ToString();
 			}
 		}
 

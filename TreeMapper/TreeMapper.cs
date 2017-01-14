@@ -8,6 +8,7 @@ using ColossalFramework.Math;
 using ColossalFramework.UI;
 using ICities;
 using UnityEngine;
+using ColossalFramework.Plugins;
 
 namespace TreeMapper
 {
@@ -40,48 +41,53 @@ namespace TreeMapper
 
 		public void ImportTrees(BoundingBox BoundingBox)
 		{
-			//RaiseTreeMapperEvent("Starting Import Trees..");
-			Bitmap bitmap = null;
-			
-			bitmap = TreeCoverClient.LoadTreeCover (BoundingBox);
-			
-			int trees_found = 0;
+            //RaiseTreeMapperEvent("Starting Import Trees..");
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "Starting Import Trees..");
+            //Bitmap bitmap = null;
 
-			if(bitmap == null)
-			{
-				return;
-			}
+            using (Bitmap bitmap = TreeCoverClient.LoadTreeCover(BoundingBox))
+            {
+                int trees_found = 0;
 
-			for (int x = 0; x < 1081; x += Density)
-			{
-				for(int y = 0; y < 1081; y += Density)
-				{
-					System.Drawing.Color pixel_color;
-					
-					pixel_color = bitmap.GetPixel(x,y);
-					
-					double intensity = ((int)pixel_color.G - (int)pixel_color.R) / 179.0;
-					if(intensity > 0.0)
-					{
-						trees_found ++;
-						//RaiseTreeMapperEvent(string.Format("Adding tree {0} {1}", x, y));
-						TreeCollection treeCollection = GameObject.FindObjectOfType<TreeCollection>();
-						IList<TreeInfo> treeInfos = treeCollection.m_prefabs;
-						
-						//			treeInfo = (from TreeInfo info in treeInfos
-						//			            where info.name.Equals (name)
-						//			            select info).FirstOrDefault();
-						TreeInfo treeInfo = treeInfos [4];
-						
-						AddTreeFromPixelPosition(x, y, treeInfo);
-					}
-				}
-				
-				Thread.Sleep(20);
-			}
-		}
+                if (bitmap == null)
+                {
+                    DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "No image!");
+                    return;
+                }
 
-		private System.Random random;
+                for (int x = 0; x < 1081; x += Density)
+                {
+                    for (int y = 0; y < 1081; y += Density)
+                    {
+                        System.Drawing.Color pixel_color;
+
+                        pixel_color = bitmap.GetPixel(x, y);
+
+                        double intensity = ((int)pixel_color.G - (int)pixel_color.R) / 179.0;
+                        if (intensity > 0.0)
+                        {
+                            trees_found++;
+
+                            TreeCollection treeCollection = GameObject.FindObjectOfType<TreeCollection>();
+                            IList<TreeInfo> treeInfos = treeCollection.m_prefabs;
+
+                            //			treeInfo = (from TreeInfo info in treeInfos
+                            //			            where info.name.Equals (name)
+                            //			            select info).FirstOrDefault();
+                            TreeInfo treeInfo = treeInfos[4];
+
+                            AddTreeFromPixelPosition(x, y, treeInfo);
+                        }
+                    }
+
+                    Thread.Sleep(20);
+                }
+
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "All trees added...");
+            }
+        }
+
+        private System.Random random;
 
 		private void AddTreeFromPixelPosition(int x, int y, TreeInfo TreeInfo)
 		{

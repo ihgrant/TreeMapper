@@ -18,10 +18,11 @@ namespace TreeMapperTester
 			Console.WriteLine (boundingBox.MinimumLatitude);
 			Console.WriteLine (boundingBox.MaximumLatitude);
 
-			Bitmap bitmap = TreeCoverClient.LoadTreeCover (boundingBox);
-
-			bitmap.Save (@"C:\TreeCoverTest\Imported.png");
-			Console.WriteLine ("Hello World!");
-		}
+            using (Bitmap bitmap = TreeCoverClient.LoadTreeCover(boundingBox))
+            {
+                bitmap.Save(@"C:\TreeCoverTest\Imported.png");
+                Console.WriteLine("Hello World!");
+            }
+        }
 	}
 }

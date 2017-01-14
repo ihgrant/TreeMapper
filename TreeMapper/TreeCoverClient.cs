@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.IO;
 using System.Drawing;
+using ColossalFramework.Plugins;
 
 namespace TreeMapper
 {
@@ -11,7 +12,9 @@ namespace TreeMapper
 		
 		public static Bitmap LoadTreeCover(BoundingBox BoundingBox)
 		{
-			Bitmap image_bitmap;
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "Loading Trees...");
+
+            Bitmap image_bitmap;
 			
 			string uri = GetTreeCoverUri(BoundingBox);
 			
@@ -20,7 +23,9 @@ namespace TreeMapper
 				image_bitmap = new Bitmap(image_stream);
 			}
 
-			return image_bitmap;
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "Bitmap created...");
+
+            return image_bitmap;
 		}
 		
 		public static Stream GetImageStream(string URI)
@@ -34,15 +39,15 @@ namespace TreeMapper
 			
 			stream = web_response.GetResponseStream ();
 
-			return stream;
+            return stream;
 		}
 		
 		public static string GetTreeCoverUri(BoundingBox BoundingBox)
 		{
 			string uri;
 			
-			int  imageSR=4326;
-			int  bboxSR=4326;
+			int imageSR = 4326;
+			int bboxSR = 4326;
 			int size = 1081;
 			
 			string boundingBoxParameter = BoundingBox.GetUriString ();

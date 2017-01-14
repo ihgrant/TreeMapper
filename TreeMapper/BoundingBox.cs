@@ -19,8 +19,7 @@ namespace TreeMapper
 		
 		public string GetUriString()
 		{
-			string boundingBoxString = MinimumLatitude + "," + MinimumLongitude + "," + MaximumLatitude + "," + MaximumLongitude;
-			return boundingBoxString;
+			return $"{MinimumLatitude},{MinimumLongitude},{MaximumLatitude},{MaximumLongitude}";
 		}
 	}
 }
