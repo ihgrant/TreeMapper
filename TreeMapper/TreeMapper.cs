@@ -25,9 +25,10 @@ namespace TreeMapper
 		public double XShift = 0;
 		public double YShift = 0;
 		public int Density = 1;
-//		public TreeInfo SelectedTree = GameObject.FindObjectOfType<TreeCollection>().m_prefabs[0];
+        //public TreeInfo SelectedTree = GameObject.FindObjectOfType<TreeCollection>().m_prefabs[0]; // this causes the loading screen to hang for some reason.
+        public TreeInfo SelectedTree;
 
-		public event EventHandler<TreeMapperArgs> TreeMapperEvent;
+        public event EventHandler<TreeMapperArgs> TreeMapperEvent;
 
 		public TreeMapper()
 		{
@@ -41,9 +42,16 @@ namespace TreeMapper
 
 		public void ImportTrees(BoundingBox BoundingBox)
 		{
-            //RaiseTreeMapperEvent("Starting Import Trees..");
             DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "Starting Import Trees..");
-            //Bitmap bitmap = null;
+            TreeCollection treeCollection = GameObject.FindObjectOfType<TreeCollection>();
+            IList<TreeInfo> treeInfos = treeCollection.m_prefabs;
+            TreeInfo treeInfo = treeInfos[4];
+
+            if (this.SelectedTree == null)
+            {
+                // default to Alder01
+                this.SelectedTree = treeInfo;
+            }
 
             using (Bitmap bitmap = TreeCoverClient.LoadTreeCover(BoundingBox))
             {
@@ -67,23 +75,12 @@ namespace TreeMapper
                         if (intensity > 0.0)
                         {
                             trees_found++;
-
-                            TreeCollection treeCollection = GameObject.FindObjectOfType<TreeCollection>();
-                            IList<TreeInfo> treeInfos = treeCollection.m_prefabs;
-
-                            //			treeInfo = (from TreeInfo info in treeInfos
-                            //			            where info.name.Equals (name)
-                            //			            select info).FirstOrDefault();
-                            TreeInfo treeInfo = treeInfos[4];
-
-                            AddTreeFromPixelPosition(x, y, treeInfo);
+                            AddTreeFromPixelPosition(x, y, this.SelectedTree);
                         }
                     }
 
                     Thread.Sleep(20);
                 }
-
-                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "All trees added...");
             }
         }
 

@@ -17,8 +17,8 @@ namespace TreeMapper
 		
 		public override void OnLevelLoaded(LoadMode m)
 		{
-			if ( m != LoadMode.NewMap ) 
-			{
+            if (m != LoadMode.NewMap && m != LoadMode.LoadMap)
+            {
 				return;
 			}
 			

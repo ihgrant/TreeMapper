@@ -18,7 +18,9 @@ namespace TreeMapper
 {
 	public class TreeMapperUIPanel: UIPanel
 	{
-		UILabel title;
+        const int INPUT_OFFSET = 120;
+
+        UILabel title;
 		
 		UITextField boundingBoxTextBox;
 		UILabel boundingBoxLabel;
@@ -43,10 +45,10 @@ namespace TreeMapper
 		UITextField densityTextBox;
 		UILabel densityLabel;
 
-//		UIDropDown treeDropdown;
-//		UILabel treeLabel;
+        UIDropDown treeDropdown;
+        UILabel treeLabel;
 
-		UILabel errorLabel;
+        UILabel errorLabel;
 
 		UIButton importButton;
 
@@ -194,16 +196,10 @@ namespace TreeMapper
 
 		private TreeInfo GetTreeByName(string name)
 		{
-			TreeInfo treeInfo;
-
 			TreeCollection treeCollection= GameObject.FindObjectOfType<TreeCollection>();
 			IList<TreeInfo> treeInfos = treeCollection.m_prefabs;
 
-//			treeInfo = (from TreeInfo info in treeInfos
-//			            where info.name.Equals (name)
-//			            select info).FirstOrDefault();
-			treeInfo = treeInfos [4];
-			return treeInfo;
+            return treeInfos.Where(tree => tree.name == name).FirstOrDefault();
 		}
 
 		private BoundingBox GetBoundingBox()
@@ -220,18 +216,14 @@ namespace TreeMapper
 			return boundingBox;
 		}
 
-		private void InitializeTreeDropwdown(int x, int y)
+		private void InitializeTreeDropdown(int x, int y)
 		{
-//			IEnumerable<string> treeNames = new List<string> ();
-//
-//			TreeCollection treeCollection = GameObject.FindObjectOfType<TreeCollection>();
-//			IEnumerable<TreeInfo> treeInfos = treeCollection.m_prefabs;
-//
-//			treeNames = (from TreeInfo treeInfo in treeInfos
-//			             select treeInfo.name);
-//
-//			InitializeDropdown (treeDropdown, treeNames, x, y);
-		}
+            TreeCollection treeCollection = GameObject.FindObjectOfType<TreeCollection>();
+            IEnumerable<TreeInfo> treeInfos = treeCollection.m_prefabs;
+            IEnumerable<string> treeNames = treeInfos.Select(tree => tree.name);
+
+            InitializeDropdown(treeDropdown, treeNames, x, y);
+        }
 		
 		private void SetButton(UIButton okButton, string p1,int x, int y)
 		{
