@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="UIUtils.cs" />
     <Compile Include="TreeMapper.cs" />
     <Compile Include="ModInfo.cs" />
     <Compile Include="Loader.cs" />

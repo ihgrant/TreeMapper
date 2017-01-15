@@ -84,10 +84,11 @@ namespace TreeMapper
 			densityLabel = AddUIComponent<UILabel>();
 			densityTextBox = AddUIComponent<UITextField>();
 
-//			treeLabel = AddUIComponent<UILabel> ();
-//			treeDropdown = AddUIComponent<UIDropDown> ();
-						
-			errorLabel = AddUIComponent<UILabel>();
+            treeLabel = AddUIComponent<UILabel>();
+            //treeDropdown = AddUIComponent<UIDropDown>();
+            treeDropdown = UIUtils.CreateDropDown(this);
+
+            errorLabel = AddUIComponent<UILabel>();
 			
 			importButton = AddUIComponent<UIButton>();
 			base.Awake();
@@ -117,38 +118,39 @@ namespace TreeMapper
 			y += vertPadding;
 			
 			SetLabel(randomnessLabel, "Randomness", x, y);
-			SetTextBox(randomnessTextBox, "40", x + 120, y);
+			SetTextBox(randomnessTextBox, "40", x + INPUT_OFFSET, y);
 			y += vertPadding;
 
 			SetLabel(xScaleLabel, "X Scale", x, y);
-			SetTextBox(xScaleTextBox, "16", x + 120, y);
+			SetTextBox(xScaleTextBox, "16", x + INPUT_OFFSET, y);
 			y += vertPadding;
 
 			SetLabel(yScaleLabel, "Y Scale", x, y);
-			SetTextBox(yScaleTextBox, "20", x + 120, y);
+			SetTextBox(yScaleTextBox, "20", x + INPUT_OFFSET, y);
 			y += vertPadding;
 
 			SetLabel(xOffsetLabel, "X Offset", x, y);
-			SetTextBox(xOffsetTextBox, "0", x + 120, y);
+			SetTextBox(xOffsetTextBox, "0", x + INPUT_OFFSET, y);
 			y += vertPadding;
 			
 			SetLabel(yOffsetLabel, "Y Offset", x, y);
-			SetTextBox(yOffsetTextBox, "0", x + 120, y);
+			SetTextBox(yOffsetTextBox, "0", x + INPUT_OFFSET, y);
 			y += vertPadding;
 
 			SetLabel(densityLabel, "Density", x, y);
-			SetTextBox(densityTextBox, "3", x + 120, y);
+			SetTextBox(densityTextBox, "3", x + INPUT_OFFSET, y);
 			y += vertPadding;
 
 			SetLabel(boundingBoxLabel, "Bounding Box", x, y);
 			//Default is Frankfort, KY, which includes some interesting terrain and trees
-			SetTextBox(boundingBoxTextBox, "-84.774950,38.264822,-84.980892,38.103126", x + 120, y);
+			SetTextBox(boundingBoxTextBox, "-84.774950,38.264822,-84.980892,38.103126", x + INPUT_OFFSET, y);
 			y += vertPadding - 5;
 
-//			SetLabel (treeLabel, "Select a Tree:", x, y);
-//			InitializeTreeDropwdown (x, y);
-			
-			SetButton(importButton, "Import Trees using Parameters", y);
+            SetLabel(treeLabel, "Select a Tree:", x, y);
+            InitializeTreeDropdown(x + INPUT_OFFSET, y);
+            y += vertPadding;
+
+            SetButton(importButton, "Import Trees using Parameters", y);
 			importButton.eventClick += importButton_eventClick;
 			height = y + vertPadding + 6;
 		}
@@ -173,9 +175,9 @@ namespace TreeMapper
 				treeMapper.Density = int.Parse(densityTextBox.text);
 				treeMapper.Randomness = double.Parse(randomnessTextBox.text);
 
-//				treeMapper.SelectedTree = GetTreeByName(treeDropdown.selectedValue);
+                treeMapper.SelectedTree = GetTreeByName(treeDropdown.selectedValue);
 
-				treeMapper.ClearTrees();
+                treeMapper.ClearTrees();
 				treeMapper.TreeMapperEvent += TreeMapperEvent;
 
                 treeMapper.ImportTrees(boundingBox);
@@ -277,23 +279,14 @@ namespace TreeMapper
 
 		private void InitializeDropdown(UIDropDown dropDown, IEnumerable<string> items, int x, int y)
 		{
-			dropDown.relativePosition = new Vector3(x, y - 4);
-			dropDown.horizontalAlignment = UIHorizontalAlignment.Left;
-			dropDown.textScale = 0.8f;
-			dropDown.color = Color.black;
-			dropDown.verticalAlignment = UIVerticalAlignment.Middle;
-			dropDown.foregroundSpriteMode = UIForegroundSpriteMode.Fill;
-			dropDown.normalBgSprite = "TextFieldPanel";
-			dropDown.hoveredBgSprite = "TextFieldPanelHovered";
-			dropDown.focusedBgSprite = "TextFieldPanel";
-			dropDown.size = new Vector3(width - 120 - 30, 20);
-			dropDown.isInteractive = true;
-			dropDown.enabled = true;
-			dropDown.builtinKeyNavigation = true;
-			foreach (string item in items) 
-			{
-				dropDown.AddItem (item);
-			}
+            dropDown.relativePosition = new Vector3(x, y - 4);
+            dropDown.size = new Vector3(width - INPUT_OFFSET - 30, 20);
+
+            items.ForEach(item =>
+            {
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, $"Tree: {item}");
+                dropDown.AddItem(item);
+            });
 		}
 		
 		private void SetLabel(UILabel pedestrianLabel, string p, int x, int y)
