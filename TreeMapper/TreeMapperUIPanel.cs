@@ -52,7 +52,11 @@ namespace TreeMapper
 
 		UIButton importButton;
 
-		public override void Awake()
+        UICheckBox clearCheckbox;
+
+        public event PropertyChangedEventHandler<bool> eventEnableCheckChanged;
+
+        public override void Awake()
 		{
 			this.isInteractive = true;
 			this.enabled = true;
@@ -61,37 +65,39 @@ namespace TreeMapper
 			
 			title = AddUIComponent<UILabel>();
 			
-			boundingBoxTextBox = AddUIComponent<UITextField>();
-			boundingBoxLabel = AddUIComponent<UILabel>();		
+            boundingBoxTextBox = UIUtils.CreateTextField(this);
+            boundingBoxLabel = AddUIComponent<UILabel>();		
 			
 			informationLabel = AddUIComponent<UILabel>();
 			
-			randomnessTextBox = AddUIComponent<UITextField>();
-			randomnessLabel = AddUIComponent<UILabel>();
+			randomnessTextBox = UIUtils.CreateTextField(this);
+            randomnessLabel = AddUIComponent<UILabel>();
 
-			xScaleTextBox = AddUIComponent<UITextField> ();
-			xScaleLabel = AddUIComponent<UILabel> ();
+			xScaleTextBox = UIUtils.CreateTextField(this);
+            xScaleLabel = AddUIComponent<UILabel> ();
 
-			yScaleTextBox = AddUIComponent<UITextField> ();
-			yScaleLabel = AddUIComponent<UILabel> ();
+			yScaleTextBox = UIUtils.CreateTextField(this);
+            yScaleLabel = AddUIComponent<UILabel> ();
 
-			xOffsetTextBox = AddUIComponent<UITextField> ();
-			xOffsetLabel = AddUIComponent<UILabel> ();
+			xOffsetTextBox = UIUtils.CreateTextField(this);
+            xOffsetLabel = AddUIComponent<UILabel> ();
 
-			yOffsetTextBox = AddUIComponent<UITextField> ();
-			yOffsetLabel = AddUIComponent<UILabel> ();
+			yOffsetTextBox = UIUtils.CreateTextField(this);
+            yOffsetLabel = AddUIComponent<UILabel> ();
 
-			densityLabel = AddUIComponent<UILabel>();
-			densityTextBox = AddUIComponent<UITextField>();
+			densityTextBox = UIUtils.CreateTextField(this);
+            densityLabel = AddUIComponent<UILabel>();
 
-            treeLabel = AddUIComponent<UILabel>();
-            //treeDropdown = AddUIComponent<UIDropDown>();
             treeDropdown = UIUtils.CreateDropDown(this);
+            treeLabel = AddUIComponent<UILabel>();
 
             errorLabel = AddUIComponent<UILabel>();
-			
-			importButton = AddUIComponent<UIButton>();
-			base.Awake();
+
+            importButton = UIUtils.CreateButton(this);
+
+            clearCheckbox = UIUtils.CreateCheckBox(this);
+
+            base.Awake();
 		}
 
 		public override void Start()
@@ -118,44 +124,52 @@ namespace TreeMapper
 			y += vertPadding;
 			
 			SetLabel(randomnessLabel, "Randomness", x, y);
-			SetTextBox(randomnessTextBox, "40", x + INPUT_OFFSET, y);
+			SetTextBox(randomnessTextBox, "40", "", x + INPUT_OFFSET, y);
 			y += vertPadding;
 
 			SetLabel(xScaleLabel, "X Scale", x, y);
-			SetTextBox(xScaleTextBox, "16", x + INPUT_OFFSET, y);
+			SetTextBox(xScaleTextBox, "16", "?", x + INPUT_OFFSET, y);
 			y += vertPadding;
 
 			SetLabel(yScaleLabel, "Y Scale", x, y);
-			SetTextBox(yScaleTextBox, "20", x + INPUT_OFFSET, y);
+			SetTextBox(yScaleTextBox, "20", "?", x + INPUT_OFFSET, y);
 			y += vertPadding;
 
 			SetLabel(xOffsetLabel, "X Offset", x, y);
-			SetTextBox(xOffsetTextBox, "0", x + INPUT_OFFSET, y);
+			SetTextBox(xOffsetTextBox, "0", "?", x + INPUT_OFFSET, y);
 			y += vertPadding;
 			
 			SetLabel(yOffsetLabel, "Y Offset", x, y);
-			SetTextBox(yOffsetTextBox, "0", x + INPUT_OFFSET, y);
+			SetTextBox(yOffsetTextBox, "0", "?", x + INPUT_OFFSET, y);
 			y += vertPadding;
 
 			SetLabel(densityLabel, "Density", x, y);
-			SetTextBox(densityTextBox, "3", x + INPUT_OFFSET, y);
+			SetTextBox(densityTextBox, "1", "How many trees will be placed for each pixel of the tree map", x + INPUT_OFFSET, y);
 			y += vertPadding;
 
 			SetLabel(boundingBoxLabel, "Bounding Box", x, y);
 			//Default is Frankfort, KY, which includes some interesting terrain and trees
-			SetTextBox(boundingBoxTextBox, "-84.774950,38.264822,-84.980892,38.103126", x + INPUT_OFFSET, y);
-			y += vertPadding - 5;
+			SetTextBox(boundingBoxTextBox, "-84.774950,38.264822,-84.980892,38.103126", "", x + INPUT_OFFSET, y);
+            y += vertPadding;
 
             SetLabel(treeLabel, "Select a Tree:", x, y);
             InitializeTreeDropdown(x + INPUT_OFFSET, y);
             y += vertPadding;
 
-            SetButton(importButton, "Import Trees using Parameters", y);
+            SetCheckbox(clearCheckbox, "Clear Existing Trees", "If true, Tree Mapper will remove all existing trees on the map before adding them.", false, x + INPUT_OFFSET, y);
+            clearCheckbox.eventCheckChanged += (c, s) =>
+            {
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, $"clearCheckbox clicked: {s.ToString()}");
+                eventEnableCheckChanged(this, s);
+            };
+            y += vertPadding;
+
+            SetButton(importButton, "Import Trees", y);
 			importButton.eventClick += importButton_eventClick;
 			height = y + vertPadding + 6;
 		}
 
-		private void importButton_eventClick(UIComponent component, UIMouseEventParameter eventParam)
+        private void importButton_eventClick(UIComponent component, UIMouseEventParameter eventParam)
 		{
             DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "Button clicked");
             try
@@ -166,7 +180,7 @@ namespace TreeMapper
 
 				TreeMapper treeMapper = new TreeMapper();
 
-				treeMapper.XScale = double.Parse (xScaleTextBox.text);
+				treeMapper.XScale = double.Parse(xScaleTextBox.text);
 				treeMapper.YScale = double.Parse(yScaleTextBox.text);
 
 				treeMapper.XShift = double.Parse(xOffsetTextBox.text);
@@ -177,8 +191,12 @@ namespace TreeMapper
 
                 treeMapper.SelectedTree = GetTreeByName(treeDropdown.selectedValue);
 
-                treeMapper.ClearTrees();
-				treeMapper.TreeMapperEvent += TreeMapperEvent;
+                if (clearCheckbox.isChecked)
+                {
+                    treeMapper.ClearTrees();
+                }
+
+                treeMapper.TreeMapperEvent += TreeMapperEvent;
 
                 treeMapper.ImportTrees(boundingBox);
                 //Thread thread = new Thread(() => treeMapper.ImportTrees(boundingBox));
@@ -227,60 +245,37 @@ namespace TreeMapper
             InitializeDropdown(treeDropdown, treeNames, x, y);
         }
 		
-		private void SetButton(UIButton okButton, string p1,int x, int y)
-		{
-			okButton.text = p1;
-			okButton.normalBgSprite = "ButtonMenu";
-			okButton.hoveredBgSprite = "ButtonMenuHovered";
-			okButton.disabledBgSprite = "ButtonMenuDisabled";
-			okButton.focusedBgSprite = "ButtonMenuFocused";
-			okButton.pressedBgSprite = "ButtonMenuPressed";
-			okButton.size = new Vector2(50, 18);
-			okButton.relativePosition = new Vector3(x, y - 3);
-			okButton.textScale = 0.8f;
-		}
-		
 		private void SetButton(UIButton okButton, string p1, int y)
 		{
 			okButton.text = p1;
-			okButton.normalBgSprite = "ButtonMenu";
-			okButton.hoveredBgSprite = "ButtonMenuHovered";
-			okButton.disabledBgSprite = "ButtonMenuDisabled";
-			okButton.focusedBgSprite = "ButtonMenuFocused";
-			okButton.pressedBgSprite = "ButtonMenuPressed";
 			okButton.size = new Vector2(260, 24);
 			okButton.relativePosition = new Vector3((int)(width - okButton.size.x) / 2,y);
-			okButton.textScale = 0.8f;
 		}
 		
-		private void SetTextBox(UITextField scaleTextBox, string p, int x, int y)
+		private void SetTextBox(UITextField scaleTextBox, string p, string tt, int x, int y)
 		{
 			scaleTextBox.relativePosition = new Vector3(x, y - 4);
-			scaleTextBox.horizontalAlignment = UIHorizontalAlignment.Left;
 			scaleTextBox.text = p;
-			scaleTextBox.textScale = 0.8f;
-			scaleTextBox.color = Color.black;
-			scaleTextBox.cursorBlinkTime = 0.45f;
-			scaleTextBox.cursorWidth = 1;
-			scaleTextBox.selectionBackgroundColor = new Color(233,201,148,255);
-			scaleTextBox.selectionSprite = "EmptySprite";
-			scaleTextBox.verticalAlignment = UIVerticalAlignment.Middle;
-			scaleTextBox.padding = new RectOffset(5, 0, 5, 0);
-			scaleTextBox.foregroundSpriteMode = UIForegroundSpriteMode.Fill;
-			scaleTextBox.normalBgSprite = "TextFieldPanel";
-			scaleTextBox.hoveredBgSprite = "TextFieldPanelHovered";
-			scaleTextBox.focusedBgSprite = "TextFieldPanel";
-			scaleTextBox.size = new Vector3(width - 120 - 30, 20);
-			scaleTextBox.isInteractive = true;
-			scaleTextBox.enabled = true;
-			scaleTextBox.readOnly = false;
-			scaleTextBox.builtinKeyNavigation = true;
-		}
+            scaleTextBox.tooltip = tt;
+            scaleTextBox.normalBgSprite = "TextFieldPanel";
+            scaleTextBox.hoveredBgSprite = "TextFieldPanelHovered";
+            scaleTextBox.focusedBgSprite = "TextFieldPanel";
+            scaleTextBox.width = width - INPUT_OFFSET - 30;
+        }
 
-		private void InitializeDropdown(UIDropDown dropDown, IEnumerable<string> items, int x, int y)
+        private void SetCheckbox(UICheckBox checkBox, string label, string tt, bool v, int x, int y)
+        {
+            checkBox.label.text = label;
+            checkBox.tooltip = tt;
+            checkBox.isChecked = v;
+            checkBox.relativePosition = new Vector3(x, y);
+            checkBox.width = width - INPUT_OFFSET - 30;
+        }
+
+        private void InitializeDropdown(UIDropDown dropDown, IEnumerable<string> items, int x, int y)
 		{
             dropDown.relativePosition = new Vector3(x, y - 4);
-            dropDown.size = new Vector3(width - INPUT_OFFSET - 30, 20);
+            dropDown.width = width - INPUT_OFFSET - 30;
 
             items.ForEach(item =>
             {

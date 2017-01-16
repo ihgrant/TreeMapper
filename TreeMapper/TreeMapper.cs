@@ -30,7 +30,7 @@ namespace TreeMapper
 
         public event EventHandler<TreeMapperArgs> TreeMapperEvent;
 
-		public TreeMapper()
+        public TreeMapper()
 		{
 			this.random = new System.Random ();
 		}
@@ -43,19 +43,20 @@ namespace TreeMapper
 		public void ImportTrees(BoundingBox BoundingBox)
 		{
             DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "Starting Import Trees..");
-            TreeCollection treeCollection = GameObject.FindObjectOfType<TreeCollection>();
-            IList<TreeInfo> treeInfos = treeCollection.m_prefabs;
-            TreeInfo treeInfo = treeInfos[4];
 
             if (this.SelectedTree == null)
             {
                 // default to Alder01
+                TreeCollection treeCollection = GameObject.FindObjectOfType<TreeCollection>();
+                IList<TreeInfo> treeInfos = treeCollection.m_prefabs;
+                TreeInfo treeInfo = treeInfos[4];
                 this.SelectedTree = treeInfo;
             }
 
             using (Bitmap bitmap = TreeCoverClient.LoadTreeCover(BoundingBox))
             {
                 int trees_found = 0;
+                //int actualDensity = (int)(1 / Density);
 
                 if (bitmap == null)
                 {
@@ -67,11 +68,10 @@ namespace TreeMapper
                 {
                     for (int y = 0; y < 1081; y += Density)
                     {
-                        System.Drawing.Color pixel_color;
-
-                        pixel_color = bitmap.GetPixel(x, y);
+                        System.Drawing.Color pixel_color = bitmap.GetPixel(x, y);
 
                         double intensity = ((int)pixel_color.G - (int)pixel_color.R) / 179.0;
+
                         if (intensity > 0.0)
                         {
                             trees_found++;
@@ -81,6 +81,8 @@ namespace TreeMapper
 
                     Thread.Sleep(20);
                 }
+
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, $"Planted {trees_found} trees.");
             }
         }
 
@@ -121,10 +123,12 @@ namespace TreeMapper
 			TreeManager tm = TreeManager.instance;
 
 			if ( tm.m_treeCount == 0 )
+            {
 				return;
+            }
 
 			uint tot = 0;
-			for (int i=0; i<r*r; i++) {
+			for (int i = 0; i < r*r; i++) {
 				uint id = tm.m_treeGrid[i];
 				if (id != 0) {
 					while (id != 0 && tot++ < TreeManager.MAX_MAP_TREES) {

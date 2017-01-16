@@ -1,4 +1,5 @@
-﻿using ColossalFramework.UI;
+﻿using ColossalFramework.Plugins;
+using ColossalFramework.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,12 +33,14 @@ namespace TreeMapper
         public static UICheckBox CreateCheckBox(UIComponent parent)
         {
             UICheckBox checkBox = parent.AddUIComponent<UICheckBox>();
+            var atlas = GetAtlas("Ingame");
 
             checkBox.width = parent.width;
             checkBox.height = 20f;
             checkBox.clipChildren = true;
 
             UISprite sprite = checkBox.AddUIComponent<UISprite>();
+            sprite.atlas = atlas;
             sprite.spriteName = "ToggleBase";
             sprite.size = new Vector2(16f, 16f);
             sprite.relativePosition = Vector3.zero;
